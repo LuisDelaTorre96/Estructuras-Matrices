@@ -6,29 +6,17 @@
 #include <ctype.h> // Para la funcion toupper()
 
 // Funcion auxiliar para convertir un caracter romano a su valor numerico
-int romanoAEntero(char *numeroRomano, int *valido){
+int romanoAEntero(char numeroRomano, int *valido){
 	*valido = 1; // Utilizamos para decir que es valido el caracter
 	numeroRomano = toupper((unsigned char)numeroRomano);
 
 	switch (numeroRomano) {
 		case 'I': return 1;
-		break;
-
 		case 'V': return 5;
-		break;
-
 		case 'X': return 10;
-		break;
-
 		case 'L': return 50;
-		break;
-
 		case 'C': return 100;
-		break;
-
 		case 'D': return 500;
-		break;
-
 		case 'M': return 1000;
 
 		default:
@@ -46,7 +34,7 @@ int validarRomano(const char *numero, int *valido){
 	int contador = 1;
 	char simboloAnterior = '\0';
 	int valorAnterior = 0;
-	int dobleResta = 0;
+	int dobleResta = 0; // Evitamos la doble resta
 
 	for(int i = 0; i < n; i++){
 		char actual = toupper((unsigned char)numero[i]);
@@ -88,6 +76,7 @@ int validarRomano(const char *numero, int *valido){
 				*valido = 0;
 				return 0;
 			}
+
 		} else {
 			contador = 1; // Reinicia al cambiar de simbolo
 		}
@@ -98,6 +87,7 @@ int validarRomano(const char *numero, int *valido){
 			if(contador > 1){
 				*valido = 0;
 				return 0;
+			}
 
 			// V, L, D nunca se restan
 			if(simboloAnterior == 'V' || simboloAnterior == 'L' || simboloAnterior == 'D'){
@@ -131,13 +121,13 @@ int validarRomano(const char *numero, int *valido){
 
 		// Continuamos avanzando
 		simboloAnterior = actual;
-		valorAnterior = ValorActual;
+		valorAnterior = valor;
 	}
 
 	return 1;
 }
 
-//
+// Convertimos la cadena romana a numero arabigo
 int romano_A_Arabigo(const char *numero, int *valido){
 	*valido = 1;
 
@@ -170,7 +160,7 @@ int romano_A_Arabigo(const char *numero, int *valido){
 		}
 
 		if(valorActual < valorSiguiente){
-			total == valorActual; // Para resta (IV, IX, XL, XC)
+			total -= valorActual; // Para resta (IV, IX, XL, XC)
 		} else {
 			total += valorActual; // Para adicion normal
 		}
@@ -186,7 +176,7 @@ int main(){
 	int resultado;
 
 	printf("Ingrese un numero romano: ");
-	if(scanf("%19s", &numero) != 1){
+	if(scanf("%19s", numero) != 1){
 		printf("ERROR! No se puede leer el numero romano.\n");
 		return 1;
 	}
