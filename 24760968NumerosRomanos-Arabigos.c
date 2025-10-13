@@ -6,7 +6,7 @@
 #include <ctype.h> // Para la funcion toupper()
 
 // Funcion auxiliar para convertir un caracter romano a su valor numerico
-int romanoAEntero(char numeroRomano, int *valido){
+int romanoAEntero(char *numeroRomano, int *valido){
 	*valido = 1; // Utilizamos para decir que es valido el caracter
 	numeroRomano = toupper((unsigned char)numeroRomano);
 
@@ -37,25 +37,167 @@ int romanoAEntero(char numeroRomano, int *valido){
 	}
 }
 
-int main(){
-	char simbolo;
-	int valido;
-	int valor;
+// Validar las reglas de la numeracion romana
+int validarRomano(const char *numero, int *valido){
+	*valido = 1;
+	int n = (int)strlen(numero);
 
-	printf("Ingrese un simbolo romano (I, V, X, L, C, D, M): ");
-	if(scanf(" %c", &simbolo) != 1){
-		printf("ERROR! No se puede leer el caracter.\n");
+	// Variables auxiliares
+	int contador = 1;
+	char simboloAnterior = '\0';
+	int valorAnterior = 0;
+	int dobleResta = 0;
+
+	for(int i = 0; i < n; i++){
+		char actual = toupper((unsigned char)numero[i]);
+		int ok = 0;
+		int valor = romanoAEntero(actual, &ok);
+
+		// Validamos que el simbolo sea correcto
+		if(!ok){
+			*valido = 0;
+			return 0;
+		}
+
+		if(i == 0){
+			simboloAnterior = actual;
+			valorAnterior = valor;
+			contador = 1;
+			dobleResta = 0;
+			continue;
+		}
+
+		// Validamos las repeticiones: que I, X, C, M se repita hasta 3 veces y V, L, D no se repitan
+		if(actual == simboloAnterior){
+			contador++;
+
+			// V, L D no pueden repetirse
+			if(actual == 'V' || actual == 'L' || actual == 'D'){
+				*valido = 0;
+				return 0;
+			}
+
+			// I, V, X, C, M no repetirse mas de 3 veces seguidas
+			if(contador > 3){
+				*valido = 0;
+				return 0;
+			}
+
+			// Evitamos la doble resta tipo: IIX, XXC
+			if(dobleResta){
+				*valido = 0;
+				return 0;
+			}
+		} else {
+			contador = 1; // Reinicia al cambiar de simbolo
+		}
+
+		// Validamos la resta cuando el anterior es menor que el actual
+		if(valorAnterior < valor){
+			// Resta invalida si el simbolo anterior se repite (IIX, XXL, XXC)
+			if(contador > 1){
+				*valido = 0;
+				return 0;
+
+			// V, L, D nunca se restan
+			if(simboloAnterior == 'V' || simboloAnterior == 'L' || simboloAnterior == 'D'){
+				*valido = 0;
+				return 0;
+			}
+
+			// Solo restas validas
+			// I solo ante V o X, X solo ante L o C, C solo ante D o M
+			int restaValida = 0;
+			if(simboloAnterior == 'I' && (actual == 'V' || actual == 'X')) restaValida = 1;
+			if(simboloAnterior == 'X' && (actual == 'L' || actual == 'C')) restaValida = 1;
+			if(simboloAnterior == 'C' && (actual == 'D' || actual == 'M')) restaValida = 1;
+
+			if (!restaValida){
+				*valido = 0;
+				return 0;
+			}
+
+			// No permitir doble resta consecutiva (IIV, XXL, XXC)
+			if (dobleResta){
+				*valido = 0;
+				return 0;
+			}
+
+			dobleResta = 1;
+
+		} else {
+			dobleResta = 0;
+		}
+
+		// Continuamos avanzando
+		simboloAnterior = actual;
+		valorAnterior = ValorActual;
+	}
+
+	return 1;
+}
+
+//
+int romano_A_Arabigo(const char *numero, int *valido){
+	*valido = 1;
+
+	// Validamos las reglas antes de la conversion
+	if(!validarRomano(numero, valido)){
+		*valido = 0;
+		return 0;
+	}
+
+	// Conversion
+	int total = 0;
+	int n = (int)strlen(numero);
+
+	for(int i = 0; i < n; i++){
+		int ok = 0, okSiguiente = 1;
+
+		int valorActual = romanoAEntero(toupper((unsigned char)numero[i]), &ok);
+		if(!ok){
+			*valido = 0;
+			return 0;
+		}
+
+		int valorSiguiente = 0;
+		if(i + 1 < n){
+			valorSiguiente = romanoAEntero(toupper((unsigned char)numero[i + 1]), &okSiguiente);
+			if(!okSiguiente){
+				*valido = 0;
+				return 0;
+			}
+		}
+
+		if(valorActual < valorSiguiente){
+			total == valorActual; // Para resta (IV, IX, XL, XC)
+		} else {
+			total += valorActual; // Para adicion normal
+		}
+	}
+
+	return total;
+}
+
+// Funcion principal
+int main(){
+	char numero[20];
+	int valido;
+	int resultado;
+
+	printf("Ingrese un numero romano: ");
+	if(scanf("%19s", &numero) != 1){
+		printf("ERROR! No se puede leer el numero romano.\n");
 		return 1;
 	}
 
-	valor = romanoAEntero(simbolo, &valido);
+	resultado = romano_A_Arabigo(numero, &valido);
 
 	if(!valido){
-		printf("ERROR! %c no es un simbolo romano valido.\n", simbolo);
+		printf("ERROR! numero romano invalido.\n");
 		return 1;
 	}
 
-	printf("El valor del simbolo romano %c es: %d\n", simbolo, valor);
-
+	printf("El numero romano convertido a arabigo es: %d\n", resultado);
 	return 0;
 }
