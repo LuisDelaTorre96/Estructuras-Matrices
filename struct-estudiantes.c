@@ -24,10 +24,12 @@ int main(){
 	for(int i = 0; i < 3; i++){
 		printf("\nEstudiante %d.\n", i + 1);
 
-		getchar(); // Limpia el \n que deja scanf antes que fgets lea el siguiente nombre.
+		getchar(); // Limpia el \n que deja scanf() antes que fgets() lea el siguiente nombre.
 
 		printf("Nombre: ");
 		fgets(datos[i].nombre, 50, stdin); // Guarda el nombre completo.
+
+		datos[i].nombre[strcspn(datos[i].nombre, "\n")] = '\0'; // Elimina el \n de fgets().
 
 		printf("Edad: ");
 		scanf("%d", &datos[i].edad);
@@ -37,13 +39,13 @@ int main(){
 	}
 
 	// Mostramos los datos capturados
-	printf("\n----- Datos de los estudiantes -----\n");
+	printf("\n----- Datos de los estudiantes -----\n\n");
 
 	for(int i = 0; i < 3; i++){
 		printf("Estudiante %d\n", i + 1);
 		printf("Nombre: %s\n", datos[i].nombre);
 		printf("Edad: %d\n", datos[i].edad);
-		printf("Promedio: %.2f\n", datos[i].promedio);
+		printf("Promedio: %.2f\n\n", datos[i].promedio);
 	}
 	return 0;
 }
