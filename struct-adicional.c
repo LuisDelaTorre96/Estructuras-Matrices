@@ -16,6 +16,7 @@ int main(){
 	const int N = 3;
 
 	struct Estudiante datos[N];
+	struct Estudiante datosCargados[N];
 
 	printf("Ingrese los datos de los estudiantes.\n");
 
@@ -45,7 +46,7 @@ int main(){
 		printf("Estudiante %d\n", i + 1);
 		printf("Nombre: %s\n", datos[i].nombre);
 		printf("Edad: %d\n", datos[i].edad);
-		printf("Promedio: %.2f\n\n", datos[i].promedio);
+		printf("Promedio: %.2f\n", datos[i].promedio);
 	}
 
 	// Calculamos y mostramos el promedio
@@ -68,5 +69,44 @@ int main(){
 	printf("Edad: %d\n", datos[mayorPromedio].edad);
 	printf("Promedio: %.2f\n", datos[mayorPromedio].promedio);
 
+	// Guardar los datos
+	FILE *f = fopen("datosEstudiantes.txt", "w"); // Se utiliza "w" para abrir el archivo para escritura.
+
+	for(int i = 0; i < N; i++){
+		fprintf(f, "%s\n", datos[i].nombre);
+		fprintf(f, "%d\n", datos[i].edad);
+		fprintf(f, "%.2f\n", datos[i].promedio);
+	}
+
+	fclose(f);
+	printf("\nDatos guardados en datosEstudiantes.txt ...");
+
+	// Cargar datos
+	f = fopen("datosEstudiantes.txt", "r"); // Se utiliza "r" para abrir el archivo para lectura.
+
+	int i = 0;
+	while(i < N && fgets(datosCargados[i].nombre, 50, f) != NULL){
+		datosCargados[i].nombre[strcspn(datosCargados[i].nombre, "\n")] = '\0';
+		fscanf(f, "%d", &datosCargados[i].edad);
+		fscanf(f, "%f", &datosCargados[i].promedio);
+		fgetc(f); // Limpia \n despues del promedio
+		i++;
+	}
+
+	fclose(f);
+
+	printf("\n--- Datos cargados desde el archivo ---\n");
+	for(int j = 0; j < i; j++){
+		printf("\nEstudiante %d\n", j + 1);
+		printf("Nombre %s\n", datosCargados[j].nombre);
+		printf("Edad: %d\n", datosCargados[j].edad);
+		printf("Promedio: %.2f\n", datosCargados[j].promedio);
+	}
+
 	return 0;
 }
+
+/* Referencias de guardar y cargar datos en archivo de texto
+https://www.youtube.com/watch?v=4Ob7tCFaMHw&t=142s
+https://www.youtube.com/watch?v=CtOaZExHUOw
+*/
